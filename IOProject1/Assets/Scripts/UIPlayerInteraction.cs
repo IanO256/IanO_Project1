@@ -1,46 +1,64 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 
 public class UIPlayerInteraction : MonoBehaviour, IInteractable
 {
     [SerializeField] private Camera playerCamera; //camera
-                                                 
+    [SerializeField] public TextMeshProUGUI myText;
     [SerializeField] public float morality = 0.0f; // morality of player (e.g., Good/Evil)
+
+    private InputAction goodAction;
+    private InputAction badAction;
+    private InputAction action;
+    public bool wasClicked;
     private void Awake()
     {
         morality = 0.0f;
 
     }
+
+    private void Start()
+    {
+        goodAction = InputSystem.actions.FindAction("Interact");
+        action = InputSystem.actions.FindAction("NPCInteract");
+        badAction = InputSystem.actions.FindAction("BadInteract");
+       // MeshRenderer renderer = GetComponent<MeshRenderer>();
+    }
     void Update()
     {
-        
-       
-    if (InteractWithCharacter() == true)
+        InteractWithCharacter();
+
+
+    if (wasClicked == true)
         {
             //Checks the result of the player interaction
             
-            if (Input.GetKeyDown(KeyCode.E))
+            if (goodAction.WasPressedThisFrame())
             {
                 morality++;
-                Debug.Log("You chose the Good Choice.");
-
+                myText.text = "You made the good choice!";
+               // GetComponent<MeshRenderer>().color = Color.blue;
+                wasClicked = false;
             }
-            else if (Input.GetKeyDown(KeyCode.R))
+            else if (badAction.WasPressedThisFrame())
             {
                 morality--;
-                Debug.Log("You chose the Bad Choice.");
-
+                
+                myText.text = "You chose the Bad Choice.";
+                wasClicked = false;
             }
         }
     }
 
 
-    private bool InteractWithCharacter()
+    private void InteractWithCharacter()
     {
         //will be false if all actions do not work. 
-        bool result = false;
         
-        if (Input.GetMouseButton(0))
+        
+        if (action.WasPressedThisFrame())
         {
             
             // Create a ray from the center of the camera viewport
@@ -59,11 +77,16 @@ public class UIPlayerInteraction : MonoBehaviour, IInteractable
                     Debug.Log("Will you choose the good or bad interaction?");
                     Debug.Log("Good Interaction = Press E");
                     Debug.Log("Bad Interaction = Press R");
-                    result = true;
+                    myText.text = "Will you choose the good or bad interaction? " +
+                        "Good Interaction = Press E" +
+                        "Bad Interaction = Press R";
+                    wasClicked = true;
+                    
                 }
             }
         }
-        return result;
+        
+       
         
     }
 }
